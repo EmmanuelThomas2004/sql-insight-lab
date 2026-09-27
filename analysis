@@ -1,0 +1,54 @@
+-- 1. Find top 5 customers by total sales
+SELECT TOP 5
+    Customer_ID,
+    SUM(Sales) AS Total_Sales
+FROM Orders
+GROUP BY Customer_ID
+ORDER BY Total_Sales DESC;
+
+
+-- 2. Monthly sales analysis
+SELECT
+    YEAR(Order_Date) AS Order_Year,
+    MONTH(Order_Date) AS Order_Month,
+    SUM(Sales) AS Total_Sales
+FROM Orders
+GROUP BY YEAR(Order_Date), MONTH(Order_Date)
+ORDER BY Order_Year, Order_Month;
+
+
+-- 3. Products with sales above average
+SELECT
+    Product_ID,
+    Product_Name,
+    SUM(Sales) AS Total_Sales
+FROM Orders
+GROUP BY Product_ID, Product_Name
+HAVING SUM(Sales) > (
+    SELECT AVG(Product_Sales)
+    FROM (
+        SELECT SUM(Sales) AS Product_Sales
+        FROM Orders
+        GROUP BY Product_ID
+    ) AS X
+);
+
+
+-- 4. Rank customers by sales
+SELECT
+    Customer_ID,
+    SUM(Sales) AS Total_Sales,
+    RANK() OVER (ORDER BY SUM(Sales) DESC) AS Sales_Rank
+FROM Orders
+GROUP BY Customer_ID;
+
+
+-- 5. Category-wise profit analysis
+SELECT
+    Category,
+    SUM(Sales) AS Total_Sales,
+    SUM(Profit) AS Total_Profit,
+    ROUND(SUM(Profit) * 100.0 / NULLIF(SUM(Sales), 0), 2) AS Profit_Margin
+FROM Orders
+GROUP BY Category
+ORDER BY Total_Profit DESC;
